@@ -1,9 +1,11 @@
+%% Converts Composition from Wt% to Moles
 function [Exp_Target,ExpMolarError]=Composition(BulkComp,ExpR)
-%%
+
+% Read Data 
 StixData=readtable('StixData.dat');
 PhaseNames=string(table2cell(StixData(:,2)))';
 
-%%
+% State Phases, Number of cations and Mr of Components 
 PhaseNam = ({'O','Wad','Ring','Opx','Cpx','C2/c','ca-pv','Aki','Gt_maj','q','Pv','Wus','Sp','CF','Ppv','Pl'});
 Phase_N = [3,3,3,4,4,4,2,3,8,1,2,1,12,3,2,5]; 
 Mr=[60.0843,101.961276,71.8444,40.3044,56.0774,61.97894;1,2,1,1,1,2];
@@ -15,10 +17,8 @@ for i = 1:length(Exp_Phases)
     ExpTemp(Exp_Phases(i),:)=ExpMC(i,:);
 end
 ExpMC=ExpTemp(Exp_Phases,:);
-%ExpMC=ExpR(Exp_Phases,:);
 ExpResults=Mr(2,:).*(ExpMC(:,1:6)./Mr(1,:));
 ExpMolar=ExpResults./sum(ExpResults,2).*Phase_N(Exp_Phases)';
-%ExpError=(ExpMC(:,7:12)./Mr(1,:));
 ExpError=(ExpR(Exp_Phases,7:12)./Mr(1,:));
 ExpMolarError=ExpError.*Phase_N(Exp_Phases)';
 Exp_Stable=PhaseNam(Exp_Phases);
@@ -29,8 +29,6 @@ ExpTarget=ExpMolar;
 ExpTarget(ExpTarget<0)=0;
 ExpTarget=ExpTarget./sum(ExpTarget,2).*round(sum(ExpTarget,2));
 NormExpTarget=ExpTarget./sum(ExpTarget,2);
-
-
 MBulkComp=(BulkComp./Mr(1,:).*Mr(2,:))./sum(BulkComp./Mr(1,:).*Mr(2,:));
 l=sum(ExpTarget>-1);
 NormExpTarget=reshape(NormExpTarget(~isnan(NormExpTarget)),l(1),6);
@@ -38,7 +36,7 @@ ExpWT=lsqnonneg(NormExpTarget',MBulkComp');
 ExpWT=ExpWT./sum(ExpWT);
 Exp_Target=[ExpWT*100,reshape(ExpTarget(~isnan(ExpTarget)),l(1),6)]';
 
-% O polymorph correction 
+% Experiment Composition Correction 
 for i=1:length(Exp_Stable)
 Var=logical(ismember(PhaseNames,Exp_Stable(i)));
 in=find(Var==1);
@@ -94,7 +92,6 @@ end
 
 NormExpTarget=Exp_Target(2:end,:)./sum(Exp_Target(2:end,:),1);
 l=sum(Exp_Target>-1);
-% NormExpTarget=reshape(NormExpTarget(~isnan(NormExpTarget)),l(1),6);
 ExpWT=lsqnonneg(NormExpTarget,MBulkComp');
 ExpWT=ExpWT./sum(ExpWT);
 
