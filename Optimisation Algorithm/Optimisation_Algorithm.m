@@ -235,6 +235,7 @@ fprintf(SModel,strcat(FileData1));
 fclose(SModel);
 
 %MultiVal(:,MultiSeed)=[mean(History,2),mean(W_history,2)];
+
 else 
     Iterate=5;
 end
@@ -251,11 +252,11 @@ end
 MeanStix=Variables;
 StixSdev=VarError;
 MeanParam=NewVariable;
-if MultiStart=='N'
+%% if MultiStart=='N'
 SdevParam=StixSdev;
-else 
-SdevParam
-end
+%% else 
+%% SdevParam=range(MultiVal);
+%% end
 
 figure;
 for i=1:length(MeanStix)
