@@ -10,13 +10,11 @@ function[NewMean,NewStDev]=Bayes(MeanStix,MeanParam,StDevParam,Stdev)
     Prior   = normpdf(x,Mean,S_D);
     
     % Construct Likelihood Gaussian
-    
-    %Likelihood  = normpdf(x,MeanParam,StDevParam); 
     Likelihood  = normpdf(x,MeanParam,StDevParam);
     Likelihood  = trapz(Prior)*dx*Likelihood/(trapz(Likelihood)*dx);
-    plot(x,Likelihood)
-    hold on 
-    plot(x,Prior)
+    % plot(x,Likelihood)
+    % hold on 
+    % plot(x,Prior)
     % Condition that x2=x1 
     p_condition=trapz(Prior.*Likelihood)*dx; 
     Pr_Li_condition=Likelihood.*Prior/p_condition;
