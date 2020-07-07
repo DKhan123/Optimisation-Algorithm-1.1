@@ -37,7 +37,7 @@ list = [strrep(ParamName(ParamIdx),'_Er',''),'T','P','Wij'];
 if sum(ParamOpt>9)>0 && sum(ParamOpt<9)>0
 if length(ExpResults)<size(Data,1)
 warning('System Underdetermined.')   
-CheckParam=input('Solve for T/P/Wij using multistart or iteratively? Y/N [Y]','s');
+CheckParam=input('Solve for T/P/Wij iteratively? Y/N [Y]','s');
 if isempty(CheckParam)
    CheckParam = 'Y';
 end
@@ -45,7 +45,12 @@ end
 else
     CheckParam = 'N';
 end
-   
+MultiStart = 'N';
+
+%% if MultiStart == 'Y'
+%% MultiSeed=input('Number of seed values?')
+%% end
+
 ParamOptIda=ismember(ParamName,list(ParamOpt));
 ParamOptIdb=ismember(ParamName,strcat(list(ParamOpt),'_Er'));
 ParamOptId=ParamOptIda+ParamOptIdb;
@@ -61,6 +66,7 @@ Variables=ParamValues(:);
 VarError=ParamError(:);
 Variables0=Variables;
 VarError0=VarError;
+
 %%
 ExcessNames=["fo fa)";"wad fwad)";"ring fring)";"odi ts)";"odi en)";"cen di)";"jd  di)";"cts di)";"cen cts)";"cen hed)";"jd  cts)";"hed cfs)";"cfs di)";"aki cor)";"gr maj)";"gr py)";"py maj)";"perov aperov)";"per wus)";"sp herc)";"ppv appv)";"an ab)"];
 T_Error=ones(length(T),1)*35/3;
@@ -79,7 +85,7 @@ Paramlogic(1)=[];
 OtherVar=[-DataN(:,11),-DataN(:,4),DataN(:,17),DataN(:,Paramlogic)];
 
 if sum(ParamOpt>9)>0 
-    if CheckParam ~= 'Y'
+    if CheckParam ~= 'Y' %% &&  MultiStart=='Y'
         if sum(ParamOpt==10)>0
             Variables=[Variables;T'];
             VarError=[VarError;T_Error];
@@ -99,9 +105,11 @@ if sum(ParamOpt>9)>0
     end
 end
 
+%% if MultiStart=='Y'
+%% SeedVal=randn(length(Variables),MultiSeed).*VarError+Variables;
+%% end
 LBP=Variables-VarError*3;
 UBP=Variables+VarError*3;
-
 LBW=W-3*W_Error;
 UBW=W+3*W_Error;
 
@@ -225,6 +233,8 @@ end
 SModel=fopen('Solution_Model_1.dat','w');
 fprintf(SModel,strcat(FileData1));
 fclose(SModel);
+
+%MultiVal(:,MultiSeed)=[mean(History,2),mean(W_history,2)];
 else 
     Iterate=5;
 end
@@ -241,7 +251,11 @@ end
 MeanStix=Variables;
 StixSdev=VarError;
 MeanParam=NewVariable;
+if MultiStart=='N'
 SdevParam=StixSdev;
+else 
+SdevParam
+end
 
 figure;
 for i=1:length(MeanStix)
